@@ -1,4 +1,4 @@
-import { useEffect, useState  } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
@@ -6,28 +6,54 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-import { Pagination, Navigation,Mousewheel } from 'swiper/modules';
+import { Pagination, Navigation } from 'swiper/modules';
+
+// Function to get day name in Arabic
 const getDayName = (dateString) => {
   const date = new Date(dateString);
   const options = { weekday: 'long' };
-  return date.toLocaleDateString('en-US', options);
+  return date.toLocaleDateString('ar-EG', options);
 };
 
 function App() {
   const [data, setData] = useState(null);
+  const [locationError, setLocationError] = useState(null);
+  const [location, setLocation] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(
-        `https://api.weatherapi.com/v1/forecast.json?key=eda8d98890214bab926190059241708&q=31.264437164841382,29.98754643247541&days=3`
-      )
-      .then((response) => {
+    // Function to get weather data
+    const fetchWeatherData = async (lat, lon) => {
+      try {
+        const response = await axios.get(
+          `https://api.weatherapi.com/v1/forecast.json?key=eda8d98890214bab926190059241708&q=${lat},${lon}&days=3`
+        );
         setData(response.data);
         console.log(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+      }
+    };
+
+    // Function to get user's location
+    const getUserLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            fetchWeatherData(latitude, longitude);
+            // Optionally, use reverse geocoding to get country information here
+            setLocation({ lat: latitude, lon: longitude });
+          },
+          (error) => {
+            setLocationError(error.message);
+          }
+        );
+      } else {
+        setLocationError("Geolocation is not supported by this browser.");
+      }
+    };
+
+    getUserLocation();
   }, []);
 
   return (
@@ -59,12 +85,11 @@ function App() {
               slidesPerView={1}
               spaceBetween={30}
               loop={true}
-              mousewheel={true}
               pagination={{
                 clickable: true,
               }}
               navigation={true}
-              modules={[Pagination, Navigation,Mousewheel]}
+              modules={[Pagination, Navigation]}
               className="mySwiper"
             >
               {data.forecast.forecastday.map((day, dayIndex) => (
@@ -96,7 +121,7 @@ function App() {
           </div>
         </div>
       ) : (
-        <p>Loading...</p>
+        <p>{locationError ? locationError : 'Loading...'}</p>
       )}
     </>
   );
