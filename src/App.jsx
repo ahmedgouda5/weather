@@ -12,7 +12,7 @@ import { Pagination, Navigation } from 'swiper/modules';
 const getDayName = (dateString) => {
   const date = new Date(dateString);
   const options = { weekday: 'long' };
-  return date.toLocaleDateString('ar-EG', options);
+  return date.toLocaleDateString('en-US', options);
 };
 
 function App() {
