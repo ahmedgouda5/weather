@@ -19,7 +19,7 @@ function App() {
   useEffect(() => {
     axios
       .get(
-        `http://api.weatherapi.com/v1/forecast.json?key=eda8d98890214bab926190059241708&q=31.264437164841382,29.98754643247541&days=3`
+        `https://api.weatherapi.com/v1/forecast.json?key=eda8d98890214bab926190059241708&q=31.264437164841382,29.98754643247541&days=3`
       )
       .then((response) => {
         setData(response.data);
